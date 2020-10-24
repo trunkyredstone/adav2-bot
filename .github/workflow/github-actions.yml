@@ -1,0 +1,31 @@
+name: adav2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test-versions:
+    name: Test Rust ${{ matrix.rust }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: ${{ matrix.rust }}
+
+      - run: cargo build
+
+      - uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: Automatically built version.
+          draft: false
+          prerelease: false
