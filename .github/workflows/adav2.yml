@@ -1,9 +1,11 @@
-name: adav2
+name: ADAv2
 
 on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
 
 jobs:
   test-versions:
