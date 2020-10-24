@@ -25,9 +25,7 @@ impl EventHandler for Handler {
 
         let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
 
-        if let Err(why) = channel_id.send_message(&ctx.http, |m| {
-            m.content(format!("✅ {} has joined.", new_member.user.name)); m
-        }).await {
+        if let Err(why) = channel_id.say(&ctx, format!("✅ {} has joined.", new_member.user.name)).await {
             println!("Client error {:?}", why)
         }
 
@@ -41,9 +39,7 @@ impl EventHandler for Handler {
 
         let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
 
-        if let Err(why) = channel_id.send_message(&ctx.http, |m| {
-            m.content(format!("❎ {} has left.", member.name)); m
-        }).await {
+        if let Err(why) = channel_id.say(&ctx, format!("❎ {} has left.", member.name)).await {
             println!("Client error {:?}", why)
         }
 
