@@ -2,8 +2,6 @@ name: ADAv2
 
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
 
