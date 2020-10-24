@@ -140,6 +140,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
+    println!("ADAv2 -> V1.1.1");
     println!("ADAv2 -> Initialising");
     let mut settings = Config::default();
     settings
