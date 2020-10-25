@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-versions:
-    name: Test Rust ${{ matrix.rust }}
+    name: Integrate and deliver - Rust stable
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
