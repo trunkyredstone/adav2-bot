@@ -116,6 +116,17 @@ impl EventHandler for Handler {
             .expect("Unable to find the config.")
             .clone();
 
+        let to_ignore = settings
+            .get_array("ignore_delete")
+            .expect("Config is wrong");
+        let to_ignore_iter = to_ignore.iter();
+        for val in to_ignore_iter {
+            if val.to_owned().into_str().expect("Config is wrong") == cid.as_u64().to_string() {
+                println!("A message was deleted in a channel that should be ignored");
+                return;
+            }
+        }
+
         let channel_id = ChannelId(settings.get("log").expect("Config is wrong"));
 
         let channel = cid.to_channel(&ctx).await.unwrap();
@@ -206,7 +217,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    println!("ADAv2 -> V1.1.1");
+    println!("ADAv2 -> V1.1.2");
     println!("ADAv2 -> Initialising");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
