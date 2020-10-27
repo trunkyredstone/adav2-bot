@@ -2,5 +2,6 @@ token = ""
 
 welcome = 0
 log = 0
+message-log = 0
 
 ignore_delete = [""]

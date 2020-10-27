@@ -128,6 +128,7 @@ impl EventHandler for Handler {
         }
 
         let channel_id = ChannelId(settings.get("log").expect("Config is wrong"));
+        let channel_id_self = ChannelId(settings.get("message-log").expect("Config is wrong"));
 
         let channel = cid.to_channel(&ctx).await.unwrap();
         let guild = channel.guild().unwrap();
@@ -141,38 +142,29 @@ impl EventHandler for Handler {
 
         let message_maybe = ctx.cache.message(cid, msg).await;
         if message_maybe.clone().is_none() {
-            if audit_entry.target_id.expect("") == msg.as_u64().clone() {
-                if let Err(why) = channel_id
-                    .say(
-                        &ctx,
-                        format!(
-                            "<@{}> deleted their message in <#{}>, but it wasn't in the cache.",
-                            user_id,
-                            cid.as_u64()
-                        ),
-                    )
-                    .await
-                {
+            if let Err(why) = channel_id.say(&ctx, format!("A message from someone was deleted in <#{}> by <@{}>, but it wasn't in the cache.",  cid.as_u64(), user_id)).await {
                     println!("Client error {:?}", why)
                 }
-            } else {
-                if let Err(why) = channel_id.say(&ctx, format!("A message from someone was deleted in <#{}> by <@{}>, but it wasn't in the cache.",  cid.as_u64(), user_id)).await {
-                    println!("Client error {:?}", why)
-                }
-            }
             return;
         }
 
         let message = message_maybe.clone().unwrap();
         let msg_content = message.content;
 
-        if audit_entry.target_id.expect("") == msg.as_u64().clone() {
-            if let Err(why) = channel_id
+        // println!("{}", &audit_entry.target_id.expect("Unable to grab a target ID from the audit log"));
+        // println!("{}", message.author.id.as_u64());
+
+        if &audit_entry
+            .target_id
+            .expect("Unable to grab a target ID from the audit log")
+            != message.author.id.as_u64()
+        {
+            if let Err(why) = channel_id_self
                 .say(
                     &ctx,
                     format!(
                         "<@{}> deleted their message in <#{}>: {}",
-                        user_id,
+                        message.author.id.as_u64(),
                         cid.as_u64(),
                         msg_content
                     ),
@@ -186,7 +178,7 @@ impl EventHandler for Handler {
                 .say(
                     &ctx,
                     format!(
-                        "A message from <@{}> was deleted in <#{}> by <@{}>: {}",
+                        "A message from <@{}> was deleted in <#{}> by possibly <@{}>: {}",
                         message.author.id.as_u64(),
                         cid.as_u64(),
                         user_id,
