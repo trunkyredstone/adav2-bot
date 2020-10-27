@@ -20,6 +20,8 @@ impl TypeMapKey for BotConfig {
 impl EventHandler for Handler {
     // For when a user joins the server
     async fn guild_member_addition(&self, ctx: Context, _gid: GuildId, new_member: Member) {
+        println!("Event | Join");
+
         let mut settings = Config::default();
         settings.merge(config::File::with_name("Settings")).unwrap();
 
@@ -31,8 +33,6 @@ impl EventHandler for Handler {
         {
             println!("Client error {:?}", why)
         }
-
-        println!("Event | Join");
     }
 
     // For when a user leaves the server
@@ -43,6 +43,8 @@ impl EventHandler for Handler {
         member: User,
         _: Option<Member>,
     ) {
+        println!("Event | Leave");
+
         let mut settings = Config::default();
         settings.merge(config::File::with_name("Settings")).unwrap();
 
@@ -54,12 +56,12 @@ impl EventHandler for Handler {
         {
             println!("Client error {:?}", why)
         }
-
-        println!("Event | Leave");
     }
 
     // For when a user changes their nickname
     async fn guild_member_update(&self, ctx: Context, old: Option<Member>, new: Member) {
+        println!("Event | Nickname change");
+
         let mut settings = Config::default();
         settings.merge(config::File::with_name("Settings")).unwrap();
 
@@ -95,8 +97,6 @@ impl EventHandler for Handler {
                 println!("Client error {:?}", why)
             }
         }
-
-        println!("Event | Nickname change");
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
@@ -108,6 +108,9 @@ impl EventHandler for Handler {
     }
 
     async fn message_delete(&self, ctx: Context, cid: ChannelId, msg: MessageId) {
+        println!("Event | Message Deleted");
+
+
         let settings: Config = ctx
             .data
             .read()
@@ -190,8 +193,6 @@ impl EventHandler for Handler {
                 println!("Client error {:?}", why)
             }
         }
-
-        println!("Event | Message Deleted");
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
@@ -209,7 +210,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    println!("ADAv2 -> V1.1.3");
+    println!("ADAv2 -> V1.1.4");
     println!("ADAv2 -> Initialising");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
