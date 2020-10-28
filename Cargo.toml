@@ -1,6 +1,6 @@
 [package]
 name = "adav2"
-version = "1.1.1"
+version = "1.1.5"
 authors = ["trunkyredstone <romano@lucchesi.co.uk>"]
 edition = "2018"
 

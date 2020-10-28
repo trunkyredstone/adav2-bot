@@ -28,7 +28,7 @@ impl EventHandler for Handler {
         let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
 
         if let Err(why) = channel_id
-            .say(&ctx, format!("✅ {} has joined.", new_member.user.name))
+            .say(&ctx, format!("✅ {} has joined | <@{}>", new_member.user.name, new_member.user.id))
             .await
         {
             println!("Client error {:?}", why)
@@ -51,7 +51,7 @@ impl EventHandler for Handler {
         let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
 
         if let Err(why) = channel_id
-            .say(&ctx, format!("❎ {} has left.", member.name))
+            .say(&ctx, format!("❎ {} has left | <@{}>", member.name, member.id))
             .await
         {
             println!("Client error {:?}", why)
@@ -74,7 +74,7 @@ impl EventHandler for Handler {
 
         if old_nick.is_none() && new_nick.is_some() {
             if let Err(why) = channel_id
-                .say(&ctx, format!("ℹ️ {} ➡ ️{}", old_name, new_nick.expect("")))
+                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_name, new_nick.expect(""), new.user.id))
                 .await
             {
                 println!("Client error {:?}", why)
@@ -83,7 +83,7 @@ impl EventHandler for Handler {
             if let Err(why) = channel_id
                 .say(
                     &ctx,
-                    format!("ℹ️ {} ➡ ️{}", old_nick.expect(""), new_nick.expect("")),
+                    format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect(""), new_nick.expect(""), new.user.id),
                 )
                 .await
             {
@@ -91,7 +91,7 @@ impl EventHandler for Handler {
             }
         } else if old_nick.is_some() && new_nick.is_none() {
             if let Err(why) = channel_id
-                .say(&ctx, format!("ℹ️ {} ➡ ️{}", old_nick.expect(""), new_name))
+                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect(""), new_name, new.user.id))
                 .await
             {
                 println!("Client error {:?}", why)
@@ -210,7 +210,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    println!("ADAv2 -> V1.1.4");
+    println!("ADAv2 -> V1.1.5");
     println!("ADAv2 -> Initialising");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
