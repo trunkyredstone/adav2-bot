@@ -1,12 +1,12 @@
 use config::Config;
-use serenity::model::guild::{AuditLogEntry, AuditLogs, Member};
-use serenity::model::id::{ChannelId, GuildId, MessageId};
-use serenity::model::user::User;
 use serenity::{
     async_trait,
     model::{channel::Message, gateway::Ready},
     prelude::*,
 };
+use serenity::model::guild::{AuditLogEntry, AuditLogs, Member};
+use serenity::model::id::{ChannelId, GuildId, MessageId};
+use serenity::model::user::User;
 
 struct Handler;
 
@@ -80,6 +80,10 @@ impl EventHandler for Handler {
                 println!("Client error {:?}", why)
             }
         } else if old_nick.is_some() && new_nick.is_some() {
+            if old_nick.clone().expect("") == new_nick.clone().expect("") {
+                return
+            }
+
             if let Err(why) = channel_id
                 .say(
                     &ctx,
@@ -210,7 +214,7 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    println!("ADAv2 -> V1.1.5");
+    println!("ADAv2 -> V1.1.6");
     println!("ADAv2 -> Initialising");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
