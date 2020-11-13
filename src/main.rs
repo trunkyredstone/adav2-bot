@@ -31,7 +31,7 @@ impl EventHandler for Handler {
             .say(&ctx, format!("✅ {} has joined | <@{}>", new_member.user.name, new_member.user.id))
             .await
         {
-            println!("Client error {:?}", why)
+            println!("Error | {:?}", why)
         }
     }
 
@@ -48,13 +48,13 @@ impl EventHandler for Handler {
         let mut settings = Config::default();
         settings.merge(config::File::with_name("Settings")).unwrap();
 
-        let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
+        let channel_id = ChannelId(settings.get("welcome").expect("Error | Config is wrong"));
 
         if let Err(why) = channel_id
             .say(&ctx, format!("❎ {} has left | <@{}>", member.name, member.id))
             .await
         {
-            println!("Client error {:?}", why)
+            println!("Error | {:?}", why)
         }
     }
 
@@ -65,7 +65,7 @@ impl EventHandler for Handler {
         let mut settings = Config::default();
         settings.merge(config::File::with_name("Settings")).unwrap();
 
-        let channel_id = ChannelId(settings.get("welcome").expect("Config is wrong"));
+        let channel_id = ChannelId(settings.get("welcome").expect("Error | Config is wrong"));
 
         let old_nick = old.to_owned().expect("").nick;
         let new_nick = new.nick;
@@ -74,31 +74,31 @@ impl EventHandler for Handler {
 
         if old_nick.is_none() && new_nick.is_some() {
             if let Err(why) = channel_id
-                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_name, new_nick.expect(""), new.user.id))
+                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_name, new_nick.expect("Couldn't get the new nickname"), new.user.id))
                 .await
             {
-                println!("Client error {:?}", why)
+                println!("Error | {:?}", why)
             }
         } else if old_nick.is_some() && new_nick.is_some() {
-            if old_nick.clone().expect("") == new_nick.clone().expect("") {
+            if old_nick.clone().expect("Couldn't get the old nickname") == new_nick.clone().expect("Couldn't get the new nickname") {
                 return
             }
 
             if let Err(why) = channel_id
                 .say(
                     &ctx,
-                    format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect(""), new_nick.expect(""), new.user.id),
+                    format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect("Couldn't get the old nickname"), new_nick.expect("Couldn't get the new nickname"), new.user.id),
                 )
                 .await
             {
-                println!("Client error {:?}", why)
+                println!("Error | {:?}", why)
             }
         } else if old_nick.is_some() && new_nick.is_none() {
             if let Err(why) = channel_id
-                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect(""), new_name, new.user.id))
+                .say(&ctx, format!("ℹ️ {} ➡ ️{} | <@{}>", old_nick.expect("Couldn't get the old nickname"), new_name, new.user.id))
                 .await
             {
-                println!("Client error {:?}", why)
+                println!("Error | {:?}", why)
             }
         }
     }
@@ -106,14 +106,13 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content == "!ping" {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
-                println!("Error sending message: {:?}", why);
+                println!("Error | {:?}", why)
             }
         }
     }
 
     async fn message_delete(&self, ctx: Context, cid: ChannelId, msg: MessageId) {
         println!("Event | Message Deleted");
-
 
         let settings: Config = ctx
             .data
@@ -150,16 +149,13 @@ impl EventHandler for Handler {
         let message_maybe = ctx.cache.message(cid, msg).await;
         if message_maybe.clone().is_none() {
             if let Err(why) = channel_id.say(&ctx, format!("A message from someone was deleted in <#{}> by <@{}>, but it wasn't in the cache.",  cid.as_u64(), user_id)).await {
-                    println!("Client error {:?}", why)
-                }
+                println!("Error | {:?}", why)
+            }
             return;
         }
 
         let message = message_maybe.clone().unwrap();
         let msg_content = message.content;
-
-        // println!("{}", &audit_entry.target_id.expect("Unable to grab a target ID from the audit log"));
-        // println!("{}", message.author.id.as_u64());
 
         if &audit_entry
             .target_id
@@ -208,14 +204,14 @@ impl EventHandler for Handler {
         let mut data = ctx.data.write().await;
         data.insert::<BotConfig>(settings);
 
-        println!("{} is Ready", ready.user.name);
+        println!("Info  | {} is Ready", ready.user.name);
     }
 }
 
 #[tokio::main]
 async fn main() {
-    println!("ADAv2 -> V1.1.6");
-    println!("ADAv2 -> Initialising");
+    println!("Info  | ADAv2: v1.1.7");
+    println!("Info  | Initialising...");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
 
@@ -227,6 +223,6 @@ async fn main() {
         .expect("Err creating client");
 
     if let Err(why) = client.start().await {
-        println!("Client error: {:?}", why);
+        println!("Error | {:?}", why);
     }
 }
