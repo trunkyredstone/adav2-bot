@@ -5,3 +5,8 @@ log = 0
 message-log = 0
 
 ignore_delete = [""]
+
+db-host = ""
+db-username = ""
+db-password = ""
+db-name = ""

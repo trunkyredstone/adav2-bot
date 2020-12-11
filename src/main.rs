@@ -7,6 +7,7 @@ use serenity::{
 use serenity::model::guild::{AuditLogEntry, AuditLogs, Member};
 use serenity::model::id::{ChannelId, GuildId, MessageId};
 use serenity::model::user::User;
+use mysql::prelude::*;
 
 struct Handler;
 
@@ -67,9 +68,9 @@ impl EventHandler for Handler {
 
         let channel_id = ChannelId(settings.get("welcome").expect("Error | Config is wrong"));
 
-        let old_nick = old.to_owned().expect("").nick;
+        let old_nick = old.to_owned().expect("No old nickname").nick;
         let new_nick = new.nick;
-        let old_name = old.to_owned().expect("").user.name;
+        let old_name = old.to_owned().expect("No old username").user.name;
         let new_name = new.user.name;
 
         if old_nick.is_none() && new_nick.is_some() {
@@ -104,11 +105,28 @@ impl EventHandler for Handler {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == "!ping" {
+        let content = msg.content;
+
+        if content.starts_with("!ping") {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
                 println!("Error | {:?}", why)
             }
         }
+        else if content.starts_with("!help") {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "Sorry, I can't help you.").await {
+                println("Error | {:?}", why)
+            }
+        }
+
+        let id = msg.author.id.as_u64().clone();
+
+        // All in one statement:
+        // INSERT INTO levels VALUES (id, 0) ON DUPLICATE KEY UPDATE points = points + 1;
+        // TODO: Add a lookup for the points; Another values table?
+        // TODO: Blacklist for points?
+        // TODO: Role assigning and boundaries?
+        
+
     }
 
     async fn message_delete(&self, ctx: Context, cid: ChannelId, msg: MessageId) {
@@ -210,12 +228,43 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
-    println!("Info  | ADAv2: v1.1.7");
-    println!("Info  | Initialising...");
+    println!("Info  | ADAv2: v1.1.8");
+    println!("Info  | Initialising config");
     let mut settings = Config::default();
     settings.merge(config::File::with_name("Settings")).unwrap();
 
     let token: String = settings.get("token").unwrap();
+
+    println!("Info  | Initialising database");
+
+    let username = settings.get("db-username").unwrap();
+    let password = settings.get("db-password").unwrap();
+    let host = settings.get("db-host").unwrap();
+    let db = settings.get("db-name").unwrap();
+    let url = format!("mysql://{}:{}@{}/{}", username, password, host, db);
+
+    let pool;
+    let maybe_pool = mysql::Pool::new(&url);
+    match maybe_pool {
+        Err(e) => {
+            panic!("Error | Unable to connect to the database");
+        }
+        Ok(p) => {
+            pool = p;
+        }
+    }
+
+    let mut conn;
+    let maybe_conn = pool.get_conn();
+    match maybe_conn {
+        Err(_e) => {
+            panic!("Error | Unable to connect to the database");
+        }
+        Ok(c) => {
+            conn = c;
+        }
+    }
+    println!("Info  | Connected");
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
