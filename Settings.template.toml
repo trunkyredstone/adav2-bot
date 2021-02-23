@@ -10,3 +10,12 @@ db-host = ""
 db-username = ""
 db-password = ""
 db-name = ""
+
+# Event stuff
+control-centre = 0
+
+event-lobby = 0
+event-waiting = 0
+event-game = 0
+event-broadcasting = 0
+event-photo = 0
