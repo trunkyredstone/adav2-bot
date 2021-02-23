@@ -3,7 +3,7 @@ use serenity::client::Context;
 use serenity::model::guild::Member;
 
 pub async fn move_vc(from: GuildChannel, to: GuildChannel, ctx: Context) {
-    println!("Info  | Moving Users");
+    println!("Info  | Moving Users Unfiltered");
     if from.kind != ChannelType::Voice || to.kind != ChannelType::Voice {
         println!("Error | One of the specified channels is not a voice channel");
         return
@@ -25,7 +25,7 @@ pub async fn move_vc(from: GuildChannel, to: GuildChannel, ctx: Context) {
 }
 
 pub async fn move_vc_filtered(from: GuildChannel, to: GuildChannel, filter: Vec<Member>, ctx: Context) {
-    println!("Info  | Moving Users");
+    println!("Info  | Moving Users Filtered");
     if from.kind != ChannelType::Voice || to.kind != ChannelType::Voice {
         println!("Error | One of the specified channels is not a voice channel");
         return
@@ -33,12 +33,17 @@ pub async fn move_vc_filtered(from: GuildChannel, to: GuildChannel, filter: Vec<
 
     let mut to_move: Vec<Member> = from.members(&ctx.cache).await.unwrap();
 
-    while to_move.len() != (0 + filter.clone().len()) {
+    let mut done_moving = false;
+
+    while !done_moving {
+        let mut moved = false;
+
         for i in 0..to_move.len() {
             let mut can_move = false;
 
             for x in filter.clone() {
                 if x.user.id == to_move[i].user.id {
+                    moved = true;
                     can_move = true;
                 }
             }
@@ -49,6 +54,10 @@ pub async fn move_vc_filtered(from: GuildChannel, to: GuildChannel, filter: Vec<
                 }
                 println!("Info  | Moved user");
             }
+        }
+
+        if moved == false {
+            done_moving = true;
         }
 
         to_move = from.members(&ctx.cache).await.unwrap();
